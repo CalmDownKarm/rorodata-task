@@ -39,7 +39,7 @@ def return_num_items(url):
     except AttributeError:
         print("Please check Keyword")
         return
-    except IndexError:
+    except IndexError: #Incase some page doesn't print it seperated by a :
         print(div)
         return div
     return num_items
@@ -54,23 +54,28 @@ def build_dict(product):
         temp["Product Name"] = product_name.get("title")
         if not temp['Product Name']:
             temp["Product Name"] = product_name.find("span").get("title")
+    
     product_price = product.find("span", {"class": "productPrice"})
     if product_price:
         temp["Product Price"] = product_price.get_text().strip()
+    
     product_merchant = product.find("span", {"class": "newMerchantName"})
     if not product_merchant:
         product_merchant = product.find("a", {"class": "newMerchantName"})
     temp["Product Merchant"] = product_merchant.get_text().strip()
+    
     product_url = product.find(
         "div", {"class": ["productGrid", "gridItemTop"]})
     if product_url:
         p_url = product_url.find("a")
         if p_url:
             temp["Product URL"] = "http://www.shopping.com" + p_url.get("href")
+    
     product_shipping = product.find(
         "div", {"class": ["taxShippingArea", "freeShip"]})
     if product_shipping:
         temp["Product Shipping"] = product_shipping.get_text().strip()
+    
     return temp
 
 
