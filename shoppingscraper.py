@@ -54,10 +54,6 @@ def build_dict(product):
     if product_shipping:
         temp["Product Shipping"] = product_shipping.get_text().strip()
     
-
-
-    import pprint
-    pprint.pprint(temp)
     return temp
 
 def return_items(url):
