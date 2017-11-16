@@ -1,5 +1,9 @@
-'''Simple Web Scraper for Shopping.com products, requires
-Requests, Click, Json and beautifulsoup'''
+'''
+Simple Web Scraper for Shopping.com products, requires
+Requests, Click, Json and beautifulsoup
+Usage use --pg flag to give a pagenumber for query 2
+this is so that you can have multiple word search terms 
+'''
 
 import json
 import requests
@@ -13,6 +17,7 @@ def make_request(url):
     try:
         requestpage = requests.get(url, headers=headers, timeout=15)
     except requests.exceptions.RequestException as e:
+        print("Check your internet connection")
         print(e)
         return
     if requestpage.status_code == 200:
@@ -96,22 +101,24 @@ def entrypoint(keyw=None, pg=None):
     else:
         # Multi Keyword Argument comes as a tuple, need to cast to string
         keyw = ' '.join(keyw)
-    if pg:
-        # Query 2 URL
-        # Create different url
-        url = "http://www.shopping.com/products~PG-<number>?KW="
-        url = url.replace('<number>', pg) + keyw
-        listofproducts = return_items(url)
-        if not listofproducts:
-            print("No Items Returned, please check Keywords/Page Numbers")
-        else:
-            with open("products.json", mode='w') as fileout:
-                json.dump(listofproducts, fileout)
-
+    
+    # Query 1 always occurs since I need to be able to check if page number is overflowing
+    url = 'http://www.shopping.com/products?sb=1&KW=' + keyw
+    num_items = return_num_items(url)
+    if not pg:
+        return
+    if pg > (num_items/40)+1:
+        print("Page Number was too high, returning first page of results")
+    # Query 2 URL
+    # Create different url
+    url = "http://www.shopping.com/products~PG-<number>?KW="
+    url = url.replace('<number>', pg) + keyw
+    listofproducts = return_items(url)
+    if not listofproducts:
+        print("No Items Returned, please check Keywords/Page Numbers")
     else:
-        # Query 1 URL
-        url = 'http://www.shopping.com/products?sb=1&KW=' + keyw
-        return_num_items(url)
+        with open("products.json", mode='w') as fileout:
+            json.dump(listofproducts, fileout)    
 
 
 if __name__ == "__main__":
