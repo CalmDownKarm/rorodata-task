@@ -4,15 +4,16 @@ Quick Web scraper for Rorodata's test
 Written in Python 3
 Uses Click, Beautifulsoup and Requests
 
-Usage
+## Usage
+
 Query 1
-```python
-python shoppingscraper.py \[keywords\]
+```
+python shoppingscraper.py [keywords]
 ``` 
 Multi word keywords are allowed, as are special characters and numbers, provided website has products that match the keyword
 
 Query 2
-```python
-python shoppingscraper.py --pg \[page number\] \[keywords\]
 ```
-float page numbers are not supported
+python shoppingscraper.py --pg [page number] [keywords]
+```
+float page numbers  not supported
