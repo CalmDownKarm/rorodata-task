@@ -15,4 +15,4 @@ Query 2
 ```python
 python shoppingscraper.py --pg \[page number\] \[keywords\]
 ```
-float page numbers will be rounded off and converted to ints
+float page numbers are not supported

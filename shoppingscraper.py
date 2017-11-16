@@ -97,7 +97,7 @@ def return_items(url, pg, num_items):
 
 @click.command()
 @click.argument('keyw', type=click.STRING, nargs=-1)
-@click.option('--pg', type=click.STRING, default=None)
+@click.option('--pg', type=click.INT, default=None)
 def entrypoint(keyw=None, pg=None):
     '''Scraper For Shopping.com, use the --pg flag to enter page number'''
     if not keyw:
@@ -113,7 +113,6 @@ def entrypoint(keyw=None, pg=None):
     # Query 2 URL
     url = "http://www.shopping.com/products~PG-<number>?KW="
     url = url.replace('<number>', str(pg)) + keyw
-    pg = int(round(float(pg)))
     listofproducts = return_items(url, pg, num_items)
     if not listofproducts:
         print("No Items Returned, please check Keywords/Page Numbers")
