@@ -1,8 +1,8 @@
 '''
 Simple Web Scraper for Shopping.com products, requires
 Requests, Click, Json and beautifulsoup
-Usage use --pg flag to give a pagenumber for query 2
-this is so that you can have multiple word search terms 
+Usage use --pg flag to give a pagenumber for query 2.
+This is so that you can have multiple word search terms 
 '''
 
 import json
@@ -10,19 +10,20 @@ import requests
 import click
 from bs4 import BeautifulSoup as bs
 
+
 def make_request(url):
     '''Makes a request to the passed url, returns a beautifulsoup object'''
+    print(url)
     headers = {'User-Agent':
                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.91 Safari/537.36'}
     try:
         requestpage = requests.get(url, headers=headers, timeout=15)
-    except requests.exceptions.RequestException as e:
-        print("Check your internet connection")
-        print(e)
+    except requests.exceptions.RequestException as request_er:
+        print(request_er)
         return
     if requestpage.status_code == 200:
         soup = bs(requestpage.text, 'lxml')
-    return soup
+        return soup
 
 
 def return_num_items(url):
@@ -32,10 +33,10 @@ def return_num_items(url):
         soup = make_request(url)
         if not soup:
             return
-        div = soup.find('div', {'id': "sortFiltersBox"}
-                        ).find("span").get("name")
+        div = soup.find('div', {'id': "sortFiltersBox"})\
+            .find("span").get("name")
         num_items = int(div.split(':')[1])
-        print(repr(num_items)+" Items")
+        print(repr(num_items) + " Items")
     except AttributeError:
         # Call Logging function
         print("\n Attribute Error")
@@ -78,15 +79,19 @@ def build_dict(product):
     return temp
 
 
-def return_items(url):
+def return_items(url, pg, num_items):
     '''Helper, Returns a JSON file of the products returned on a particular
     page for a particular keyword'''
+    max_num = int(num_items / 40) + 1
+    if pg > max_num:
+        print("Page Number was too high, max is " + repr(max_num))
+        return
     soup = make_request(url)
     if not soup:
         return
     productdivs = soup.find_all("div", {"class": "gridBox"})
     list_of_products = [build_dict(product) for product in productdivs]
-    print(repr(len(list_of_products))+" Items returned")
+    print(repr(len(list_of_products)) + " Items returned")
     return list_of_products
 
 
@@ -94,31 +99,26 @@ def return_items(url):
 @click.argument('keyw', type=click.STRING, nargs=-1)
 @click.option('--pg', type=click.STRING, default=None)
 def entrypoint(keyw=None, pg=None):
-    '''Entry Point for the program, makes request and calls respective helpers for query'''
+    '''Scraper For Shopping.com, use the --pg flag to enter page number'''
     if not keyw:
         print("No keyword supplied")
         return
     else:
         # Multi Keyword Argument comes as a tuple, need to cast to string
         keyw = ' '.join(keyw)
-    
-    # Query 1 always occurs since I need to be able to check if page number is overflowing
     url = 'http://www.shopping.com/products?sb=1&KW=' + keyw
     num_items = return_num_items(url)
     if not pg:
         return
-    if pg > (num_items/40)+1:
-        print("Page Number was too high, returning first page of results")
     # Query 2 URL
-    # Create different url
     url = "http://www.shopping.com/products~PG-<number>?KW="
-    url = url.replace('<number>', pg) + keyw
-    listofproducts = return_items(url)
+    url = url.replace('<number>', str(pg)) + keyw
+    listofproducts = return_items(url, int(pg), num_items)
     if not listofproducts:
         print("No Items Returned, please check Keywords/Page Numbers")
     else:
         with open("products.json", mode='w') as fileout:
-            json.dump(listofproducts, fileout)    
+            json.dump(listofproducts, fileout)
 
 
 if __name__ == "__main__":
