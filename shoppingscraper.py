@@ -38,6 +38,7 @@ def return_num_items(url):
         print(repr(num_items) + " Total Items")
     except AttributeError:
         print("Please check Keyword")
+        return
     except IndexError:
         print(div)
         return div
@@ -107,7 +108,8 @@ def entrypoint(keyw=None, pg=None):
     # Query 2 URL
     url = "http://www.shopping.com/products~PG-<number>?KW="
     url = url.replace('<number>', str(pg)) + keyw
-    listofproducts = return_items(url, int(pg), num_items)
+    pg = int(round(float(pg)))
+    listofproducts = return_items(url, pg, num_items)
     if not listofproducts:
         print("No Items Returned, please check Keywords/Page Numbers")
     else:
