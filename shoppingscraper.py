@@ -13,7 +13,6 @@ from bs4 import BeautifulSoup as bs
 
 def make_request(url):
     '''Makes a request to the passed url, returns a beautifulsoup object'''
-    print(url)
     headers = {'User-Agent':
                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.91 Safari/537.36'}
     try:
@@ -36,12 +35,12 @@ def return_num_items(url):
         div = soup.find('div', {'id': "sortFiltersBox"})\
             .find("span").get("name")
         num_items = int(div.split(':')[1])
-        print(repr(num_items) + " Items")
+        print(repr(num_items) + " Total Items")
     except AttributeError:
-        # Call Logging function
-        print("\n Attribute Error")
+        print("Please check Keyword")
     except IndexError:
-        print("\n Index Error")
+        print(div)
+        return div
     return num_items
 
 
@@ -58,24 +57,19 @@ def build_dict(product):
     if product_price:
         temp["Product Price"] = product_price.get_text().strip()
     product_merchant = product.find("span", {"class": "newMerchantName"})
-
     if not product_merchant:
         product_merchant = product.find("a", {"class": "newMerchantName"})
     temp["Product Merchant"] = product_merchant.get_text().strip()
-
     product_url = product.find(
         "div", {"class": ["productGrid", "gridItemTop"]})
     if product_url:
         p_url = product_url.find("a")
         if p_url:
             temp["Product URL"] = "http://www.shopping.com" + p_url.get("href")
-
     product_shipping = product.find(
         "div", {"class": ["taxShippingArea", "freeShip"]})
-
     if product_shipping:
         temp["Product Shipping"] = product_shipping.get_text().strip()
-
     return temp
 
 
@@ -83,8 +77,8 @@ def return_items(url, pg, num_items):
     '''Helper, Returns a JSON file of the products returned on a particular
     page for a particular keyword'''
     max_num = int(num_items / 40) + 1
-    if pg > max_num:
-        print("Page Number was too high, max is " + repr(max_num))
+    if pg > max_num or pg <= 0:
+        print("Page Number Range Should be 1 to " + repr(max_num))
         return
     soup = make_request(url)
     if not soup:
